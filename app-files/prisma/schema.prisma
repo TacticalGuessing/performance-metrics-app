@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId        Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  passwordHash  String   @map("password_hash") // Maps to the password_hash column
+  role          String   @default("user") // We'll need to handle CHECK constraint logic in application or via raw SQL migration step if vital
+  createdAt     DateTime @default(now()) @map("created_at")
+  personnelId   String?  @unique @map("personnel_id")
+  personnel     Personnel? @relation(fields: [personnelId], references: [personnelId], onDelete: SetNull)
+
+  @@map("users") // Maps to the "users" table
+}
+
+model Team {
+  teamId     String      @id @map("team_id")
+  teamName   String      @unique @map("team_name")
+  subTeams   SubTeam[]
+
+  @@map("teams")
+}
+
+model SubTeam {
+  subTeamId   String      @id @map("sub_team_id")
+  subTeamName String      @map("sub_team_name")
+  teamId      String      @map("team_id")
+  team        Team        @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
+  personnel   Personnel[]
+
+  @@unique([teamId, subTeamName]) // Matches SQL UNIQUE constraint
+  @@map("sub_teams")
+}
+
+model Personnel {
+  personnelId   String      @id @map("personnel_id")
+  personnelName String      @map("personnel_name")
+  email         String?     @unique // Assuming personnel email is also unique if present
+  role          String?     // Job role/title
+  subTeamId     String?     @map("sub_team_id")
+  subTeam       SubTeam?    @relation(fields: [subTeamId], references: [subTeamId], onDelete: SetNull)
+  user          User?       // One-to-one relation if a personnel is a user
+  contracts     Contract[]
+  trainingData  TrainingData[]
+
+
+  @@map("personnel")
+}
+
+model Contract {
+  contractPk                  Int      @id @default(autoincrement()) @map("contract_pk")
+  contractId                  String   @map("contract_id")
+  snapshotMonth               String   @map("snapshot_month") // YYYY-MM
+  metricName                  String   @map("metric_name")
+  value                       Float?
+  targetValue                 Float?   @map("target_value")
+  valueType                   String?  @map("value_type") // e.g., 'percentage', 'currency'
+  dateAssociated              DateTime? @map("date_associated") @db.Date // Use @db.Date for DATE SQL type
+  personnelId                 String?  @map("personnel_id")
+  personnel                   Personnel? @relation(fields: [personnelId], references: [personnelId], onDelete: SetNull)
+
+  // Specific KPI fields
+  coKpiTargetCompletionDate   DateTime? @map("co_kpi_target_completion_date") @db.Date
+  coKpiActualCompletionDate   DateTime? @map("co_kpi_actual_completion_date") @db.Date
+  awardNoticeRequiredByDate   DateTime? @map("award_notice_required_by_date") @db.Date
+  awardNoticePublishedDate    DateTime? @map("award_notice_published_date") @db.Date
+  uk01NoticeRequiredByDate    DateTime? @map("uk01_notice_required_by_date") @db.Date
+  uk01NoticePublishedDate     DateTime? @map("uk01_notice_published_date") @db.Date
+  contractBudgetValue         Decimal?  @map("contract_budget_value") @db.Decimal(15, 2)
+  contractActualSpend         Decimal?  @map("contract_actual_spend") @db.Decimal(15, 2)
+  contractExpiryDate          DateTime? @map("contract_expiry_date") @db.Date
+  contractClosureTargetDate   DateTime? @map("contract_closure_target_date") @db.Date
+  contractActualClosureDate   DateTime? @map("contract_actual_closure_date") @db.Date
+  hasSocialValueCommitment    Boolean?  @map("has_social_value_commitment")
+  isSmeAwarded                Boolean?  @map("is_sme_awarded")
+  wasCompetitivelyTendered    Boolean?  @map("was_competitively_tendered")
+  cabinetOfficeConditionAMet  Boolean?  @map("cabinet_office_condition_a_met")
+  cabinetOfficeConditionBMet  Boolean?  @map("cabinet_office_condition_b_met")
+  cabinetOfficeConditionCMet  Boolean?  @map("cabinet_office_condition_c_met")
+
+  @@unique([contractId, snapshotMonth, metricName])
+  @@map("contracts")
+}
+
+model TrainingData {
+  trainingId             Int      @id @default(autoincrement()) @map("training_id")
+  personnelId            String   @map("personnel_id")
+  snapshotMonth          String   @map("snapshot_month") // YYYY-MM
+  trainingModuleId       String?  @map("training_module_id")
+  trainingModuleName     String?  @map("training_module_name")
+  trainingStatus         String?  @map("training_status")
+  completionPercentage   Int?     @map("completion_percentage")
+  trainingCompletionDate DateTime? @map("training_completion_date") @db.Date
+  trainingDueDate        DateTime? @map("training_due_date") @db.Date
+  personnel              Personnel @relation(fields: [personnelId], references: [personnelId], onDelete: Cascade)
+
+
+  @@unique([personnelId, snapshotMonth, trainingModuleId])
+  @@map("training_data")
+}

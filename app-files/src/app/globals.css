@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-background-primary text-textClr-primary;
+  /* Or, for a simpler initial test if theme names aren't working:
+     @apply bg-gray-900 text-gray-100;
+  */
+}
