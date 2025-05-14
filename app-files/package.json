@@ -2,7 +2,6 @@
   "name": "app-files",
   "version": "0.1.0",
   "private": true,
-  
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,6 +11,9 @@
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",
+    "bcryptjs": "^3.0.2",
+    "jose": "^6.0.11",
+    "jsonwebtoken": "^9.0.2",
     "jszip": "^3.10.1",
     "next": "15.3.2",
     "papaparse": "^5.5.2",
@@ -28,5 +30,4 @@
     "prisma": "^6.7.0",
     "tailwindcss": "^3.4.0"
   }
-  
 }

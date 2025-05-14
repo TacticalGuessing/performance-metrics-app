@@ -1,7 +1,14 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/components/*": ["src/components/*"],
+      "@/context/*": ["src/context/*"],
+      "@/lib/*": ["src/lib/*"],
+      "@/services/*": ["src/services/*"],
+      "@/app/*": ["src/app/*"]
+      // Add other common top-level src folders if you have them
     }
-  }
+  },
+  "exclude": ["node_modules", ".next"]
 }
