@@ -8,6 +8,7 @@ import Link from 'next/link';
 export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('user'); // Default role for new users
@@ -30,13 +31,19 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!employeeId.trim()) { // Basic validation for employeeId
+        setError('Employee ID is required.');
+        setIsLoading(false);
+        return;
+    }
+
     // Add more client-side validation if desired (e.g., password strength)
 
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({ name, email, password, employeeId }),
       });
 
       const data = await response.json();
@@ -49,6 +56,7 @@ export default function RegisterPage() {
       // Optionally reset form or redirect
       setName('');
       setEmail('');
+      setEmployeeId('');
       setPassword('');
       setConfirmPassword('');
       // router.push('/auth/login'); // Example redirect
@@ -78,6 +86,10 @@ export default function RegisterPage() {
             <label htmlFor="email" className="block text-sm font-medium text-textClr-secondary mb-1">Email Address</label>
             <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="input-field" placeholder="your.name@example.gov"/>
             <p className="mt-1 text-xs text-textClr-secondary">Use your official email address.</p>
+          </div>
+          <div>
+            <label htmlFor="employeeId" className="block text-sm font-medium text-textClr-secondary mb-1">Employee ID</label>
+            <input type="text" id="employeeId" value={employeeId} onChange={(e) => setEmployeeId(e.target.value.toUpperCase())} required className="input-field" placeholder="e.g., P0001"/>
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-textClr-secondary mb-1">Password</label>

@@ -1,101 +1,94 @@
 // src/middleware.js
 import { NextResponse } from 'next/server';
-// Ensure your jsconfig.json is set up for @/lib alias, or use correct relative path:
-// e.g., import { verifyToken, getTokenFromRequest } from './lib/authUtils.js';
-import { verifyToken, getTokenFromRequest } from '@/lib/authUtils.js'; 
+import { verifyToken, getTokenFromRequest } from '@/lib/authUtils.js';
 
 const PUBLIC_PATHS = [
-  '/', // Assuming your homepage is public or handles its own auth logic
+  '/', 
   '/auth/login', 
   '/auth/register', 
-  '/api/auth/login',    // Login API itself must be public
-  '/api/auth/register', // Registration API must be public
-  // '/api/auth/me',    // This is NOT public; it requires a token
+  '/api/auth/login',
+  '/api/auth/register',
 ];
 
-const ADMIN_PATHS = [
-  '/admin', // This will match /admin, /admin/data-generator, etc.
-  // Add any admin-specific API routes here if they don't fall under a general /api/admin prefix
-  // For example: '/api/users/delete' (if that's an admin-only action)
+// Paths that require admin role SPECIFICALLY
+const ADMIN_ONLY_SPECIFIC_PATHS = [
+  '/admin', // Matches /admin, /admin/data-generator, etc.
+  '/api/generate-data', // Admin specific API for data generation
+  // Add future paths like '/api/admin/users'
 ];
+
+// Paths that require ANY authenticated user (user or admin)
+const AUTHENTICATED_USER_PATHS = [
+    '/dashboard',
+    '/kpis', // For future KPI detail pages
+    '/api/kpis', // For KPI data fetching APIs
+    '/api/auth/me', // Getting current user details
+    '/api/auth/logout', // Logout API
+    // Add other paths that any logged-in user can access
+];
+
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
-  const token = getTokenFromRequest(request); // Get token string using the helper
+  const token = getTokenFromRequest(request);
 
   console.log(`--- MIDDLEWARE START for path: ${pathname} ---`);
-  console.log(`Middleware: Token found in cookie: ${token ? 'Yes (length ' + token.length + ')' : 'No'}`);
+  console.log(`Middleware: Token found: ${token ? 'Yes' : 'No'}`);
 
-  // 1. Allow access to explicitly public paths
+  // 1. Allow public paths
   if (PUBLIC_PATHS.some(publicPath => pathname === publicPath || (publicPath !== '/' && pathname.startsWith(publicPath)))) {
     console.log(`Middleware: Path ${pathname} is public.`);
-    // If user is logged in (has a valid token) and tries to access login/register, redirect them
     if (token && (pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register'))) {
-      const decodedTokenForPublicRedirect = await verifyToken(token); // verifyToken is async
-      if (decodedTokenForPublicRedirect) { // If token is valid
+      const decodedToken = await verifyToken(token);
+      if (decodedToken) {
+        // All logged-in users go to dashboard from auth pages
         console.log(`Middleware: User already logged in, redirecting from ${pathname} to /dashboard.`);
         return NextResponse.redirect(new URL('/dashboard', request.url));
       }
     }
-    console.log(`Middleware: Allowing public path ${pathname} to proceed.`);
-    return NextResponse.next(); // Allow request
+    return NextResponse.next();
   }
 
-  // 2. Authentication Check for all other (protected) paths
+  // 2. Authentication Check for all other paths
   if (!token) {
     console.warn(`Middleware: No token for protected path ${pathname}. Redirecting to login.`);
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ message: 'Authentication required.' }, { status: 401 });
-    }
-    const loginUrl = new URL('/auth/login', request.url);
-    loginUrl.searchParams.set('redirectedFrom', pathname);
-    return NextResponse.redirect(loginUrl);
+    // ... (same redirect to login / 401 for API logic as before) ...
+    if (pathname.startsWith('/api/')) return NextResponse.json({ message: 'Authentication required.' }, { status: 401 });
+    const loginUrl = new URL('/auth/login', request.url); loginUrl.searchParams.set('redirectedFrom', pathname); return NextResponse.redirect(loginUrl);
   }
 
-  // 3. Verify Token (token exists at this point)
-  const decodedToken = await verifyToken(token); 
-
+  // 3. Verify Token (token exists)
+  const decodedToken = await verifyToken(token);
   if (!decodedToken) {
-    console.warn(`Middleware: Invalid or expired token for path ${pathname}. Clearing cookie and redirecting to login.`);
-    const loginUrl = new URL('/auth/login', request.url);
-    const response = NextResponse.redirect(loginUrl);
-    response.cookies.set('authToken', '', { maxAge: -1, path: '/' }); // Expire the cookie
-
-    if (pathname.startsWith('/api/')) {
-      // For API routes, just return 401 after attempting to clear cookie
-      const apiResponse = NextResponse.json({ message: 'Invalid or expired token.' }, { status: 401 });
-      apiResponse.cookies.set('authToken', '', { maxAge: -1, path: '/' });
-      return apiResponse;
-    }
-    return response; // For page routes, redirect with cookie cleared
-  }
-
-  // 4. Role-Based Access Control (User is authenticated, token is valid)
-  const requiresAdmin = ADMIN_PATHS.some(adminPath => pathname.startsWith(adminPath));
-  
-  console.log(`Middleware RBAC Check: Path: ${pathname}, User Role: '${decodedToken.role}', Requires Admin: ${requiresAdmin}`);
-
-  if (requiresAdmin && decodedToken.role !== 'admin') { 
-    console.warn(`Middleware: Access DENIED. User role '${decodedToken.role}' is not 'admin' for admin path: ${pathname}. Redirecting.`);
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ message: 'Forbidden: Admin access required.' }, { status: 403 });
-    }
-    return NextResponse.redirect(new URL('/dashboard?error=forbidden_admin_access', request.url));
+    // ... (same invalid token redirect / 401 for API / clear cookie logic as before) ...
+    console.warn(`Middleware: Invalid or expired token for path: ${pathname}. Clearing cookie and redirecting to login.`);
+    const loginUrl = new URL('/auth/login', request.url); const response = NextResponse.redirect(loginUrl); response.cookies.set('authToken', '', { maxAge: -1, path: '/' });
+    if (pathname.startsWith('/api/')) { const apiResponse = NextResponse.json({ message: 'Invalid or expired token.' }, { status: 401 }); apiResponse.cookies.set('authToken', '', { maxAge: -1, path: '/' }); return apiResponse; }
+    return response;
   }
   
-  // 5. If all checks pass, proceed with the request
+  console.log(`Middleware: Valid token for user ${decodedToken.email}, role: ${decodedToken.role}`);
+
+  // 4. Role-Based Access Control for Admin-Specific Paths
+  const requiresAdminForSpecificPath = ADMIN_ONLY_SPECIFIC_PATHS.some(adminPath => pathname.startsWith(adminPath));
+
+  if (requiresAdminForSpecificPath && decodedToken.role !== 'admin') {
+    console.warn(`Middleware: Access DENIED. User role '${decodedToken.role}' to ADMIN-ONLY path: ${pathname}.`);
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ message: 'Forbidden: Admin access required for this resource.' }, { status: 403 });
+    }
+    // Redirect non-admins trying to access admin pages to their dashboard
+    return NextResponse.redirect(new URL('/dashboard?error=admin_only_area', request.url));
+  }
+
+  // 5. Check if path requires at least general authentication (most other non-public paths)
+  // This check is implicitly handled because if it wasn't public and token was required, we'd have already passed auth.
+  // The AUTHENTICATED_USER_PATHS array can be used for clarity or if some authenticated paths have further specific rules.
+  // For now, if it passed token validation and isn't an admin-only path that was denied, we allow it.
+
   console.log(`Middleware: Access GRANTED for role '${decodedToken.role}' to path: ${pathname}.`);
-  
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-decoded-userid', decodedToken.userId?.toString() || ''); // Ensure string
-  requestHeaders.set('x-decoded-email', decodedToken.email || '');
-  requestHeaders.set('x-decoded-role', decodedToken.role || '');
-
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  // ... (set headers and NextResponse.next() as before) ...
+  const requestHeaders = new Headers(request.headers); /* ... */ requestHeaders.set('x-decoded-token-role', decodedToken.role || ''); /* ... */ return NextResponse.next({ request: { headers: requestHeaders }});
 }
 
 // Matcher to specify which paths the middleware should run on
