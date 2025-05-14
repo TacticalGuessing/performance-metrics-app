@@ -1,0 +1,51 @@
+supplier_id,supplier_name,country,city,contact_email,rating
+SUP0001,Zenith Logistics Group,Japan,Sapporo,zenithlogistics0001@example-supplier.com,2.7
+SUP0002,Orion Logistics Inc.,India,Pune,orionlogistics0002@example-supplier.com,1.8
+SUP0003,Synergy Cloud Corp,Germany,Munich,synergycloud0003@example-supplier.com,4.7
+SUP0004,Core Systems Ltd.,Germany,Düsseldorf,coresystems0004@example-supplier.com,2.7
+SUP0005,Apex Systems Ltd.,Japan,Sapporo,apexsystems0005@example-supplier.com,2.8
+SUP0006,Cyber Innovations Ltd.,France,Paris,cyberinnovations0006@example-supplier.com,1.4
+SUP0007,Stellar Networks Corp,Japan,Tokyo,stellarnetworks0007@example-supplier.com,4.9
+SUP0008,Synergy Data Enterprises,USA,New York,synergydata0008@example-supplier.com,1.2
+SUP0009,Vertex Consulting Global,China,Beijing,vertexconsulting0009@example-supplier.com,1.7
+SUP0010,Synergy Cloud Tech,France,Paris,synergycloud0010@example-supplier.com,2
+SUP0011,Zenith Innovations Solutions,India,Kolkata,zenithinnovations0011@example-supplier.com,4.3
+SUP0012,Stellar Innovations Inc.,India,Delhi,stellarinnovations0012@example-supplier.com,3.3
+SUP0013,Core Secure Group,France,Lyon,coresecure0013@example-supplier.com,4.2
+SUP0014,Apex Consulting Corp,France,Lyon,apexconsulting0014@example-supplier.com,4
+SUP0015,Stellar Logistics Enterprises,Japan,Kyoto,stellarlogistics0015@example-supplier.com,3.2
+SUP0016,Cyber Innovations Tech,Germany,Munich,cyberinnovations0016@example-supplier.com,4.9
+SUP0017,Orion Innovations Ltd.,Brazil,Fortaleza,orioninnovations0017@example-supplier.com,4.5
+SUP0018,Core Networks Corp,Australia,Gold Coast,corenetworks0018@example-supplier.com,1.7
+SUP0019,Synergy Dynamics Enterprises,China,Guangzhou,synergydynamics0019@example-supplier.com,3.8
+SUP0020,Synergy Networks Corp,India,Chennai,synergynetworks0020@example-supplier.com,1.7
+SUP0021,Momentum Networks Group,USA,Seattle,momentumnetworks0021@example-supplier.com,3.8
+SUP0022,Aegis Cloud Ltd.,Canada,Calgary,aegiscloud0022@example-supplier.com,2.9
+SUP0023,Orion Systems Solutions,China,Chengdu,orionsystems0023@example-supplier.com,4.7
+SUP0024,Apex Secure Inc.,USA,Seattle,apexsecure0024@example-supplier.com,2
+SUP0025,Stellar Technologies Group,Brazil,Rio de Janeiro,stellartechnologies0025@example-supplier.com,3.5
+SUP0026,Vertex Technologies Inc.,Canada,Quebec City,vertextechnologies0026@example-supplier.com,2.4
+SUP0027,Stellar Innovations Ltd.,Canada,Quebec City,stellarinnovations0027@example-supplier.com,3.7
+SUP0028,Core Networks Corp,Brazil,Salvador,corenetworks0028@example-supplier.com,3.6
+SUP0029,Quantum Data Ltd.,UK,Bristol,quantumdata0029@example-supplier.com,3.4
+SUP0030,Synergy Secure Group,India,Chennai,synergysecure0030@example-supplier.com,3
+SUP0031,Stellar Consulting Solutions,Canada,Calgary,stellarconsulting0031@example-supplier.com,1.2
+SUP0032,Quantum Systems Tech,Australia,Brisbane,quantumsystems0032@example-supplier.com,2.3
+SUP0033,Synergy Technologies Group,Canada,Toronto,synergytechnologies0033@example-supplier.com,1.7
+SUP0034,Apex Secure Group,UK,Leeds,apexsecure0034@example-supplier.com,1.7
+SUP0035,Vertex Dynamics Global,Australia,Hobart,vertexdynamics0035@example-supplier.com,1.5
+SUP0036,Quantum Networks Enterprises,Brazil,Fortaleza,quantumnetworks0036@example-supplier.com,1.5
+SUP0037,Quantum Networks Solutions,Brazil,Belo Horizonte,quantumnetworks0037@example-supplier.com,2.9
+SUP0038,Nova Systems Ltd.,Brazil,Salvador,novasystems0038@example-supplier.com,4.7
+SUP0039,Zenith Cloud Corp,Germany,Hamburg,zenithcloud0039@example-supplier.com,1
+SUP0040,Orion Logistics Corp,Germany,Hamburg,orionlogistics0040@example-supplier.com,4.1
+SUP0041,Synergy Dynamics Inc.,USA,New York,synergydynamics0041@example-supplier.com,2
+SUP0042,Core Logistics Enterprises,Australia,Brisbane,corelogistics0042@example-supplier.com,2.1
+SUP0043,Cyber Cloud Inc.,Canada,Edmonton,cybercloud0043@example-supplier.com,4.4
+SUP0044,Vertex Systems Enterprises,USA,Los Angeles,vertexsystems0044@example-supplier.com,3.4
+SUP0045,Momentum Technologies Corp,Canada,Toronto,momentumtechnologies0045@example-supplier.com,1.2
+SUP0046,Nova Networks Enterprises,Brazil,Salvador,novanetworks0046@example-supplier.com,1.7
+SUP0047,Quantum Systems Inc.,China,Guangzhou,quantumsystems0047@example-supplier.com,1.3
+SUP0048,Zenith Logistics Enterprises,UK,Bristol,zenithlogistics0048@example-supplier.com,1.5
+SUP0049,Vertex Technologies Global,USA,San Francisco,vertextechnologies0049@example-supplier.com,3.5
+SUP0050,Apex Consulting Corp,USA,Boston,apexconsulting0050@example-supplier.com,3.2

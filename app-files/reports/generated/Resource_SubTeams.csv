@@ -1,0 +1,14 @@
+sub_team_id,team_id,sub_team_name
+ST001,T001,Networks - Alpha
+ST002,T001,Networks - Bravo
+ST003,T001,Networks - Charlie
+ST004,T002,Software - Alpha
+ST005,T002,Software - Bravo
+ST006,T002,Software - Charlie
+ST007,T003,Hardware - Alpha
+ST008,T004,Space - Alpha
+ST009,T004,Space - Bravo
+ST010,T004,Space - Charlie
+ST011,T005,Professional Services - Alpha
+ST012,T005,Professional Services - Bravo
+ST013,T005,Professional Services - Charlie

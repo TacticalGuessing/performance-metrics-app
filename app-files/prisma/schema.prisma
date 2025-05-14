@@ -66,6 +66,11 @@ model Contract {
   personnelId                 String?  @map("personnel_id")
   personnel                   Personnel? @relation(fields: [personnelId], references: [personnelId], onDelete: SetNull)
 
+    // --- ADD THESE LINES FOR SUPPLIER RELATION ---
+  supplierId                  String?   @map("supplier_id") // Foreign key
+  supplier                    Supplier?  @relation(fields: [supplierId], references: [supplierId], onDelete: SetNull) // Relation field
+  // --- END OF ADDED LINES FOR SUPPLIER ---
+
   // Specific KPI fields
   coKpiTargetCompletionDate   DateTime? @map("co_kpi_target_completion_date") @db.Date
   coKpiActualCompletionDate   DateTime? @map("co_kpi_actual_completion_date") @db.Date
@@ -104,4 +109,16 @@ model TrainingData {
 
   @@unique([personnelId, snapshotMonth, trainingModuleId])
   @@map("training_data")
+}
+
+model Supplier {
+  supplierId    String     @id @map("supplier_id")
+  supplierName  String     @map("supplier_name")
+  country       String?
+  city          String?
+  contactEmail  String?    @unique @map("contact_email")
+  rating        Float?     // Assuming rating is a number like 4.5
+  contracts     Contract[] // One supplier can have many contracts
+
+  @@map("suppliers")
 }
