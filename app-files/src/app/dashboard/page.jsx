@@ -3,61 +3,14 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-// Ensure these paths are correct or use your path aliases
-import { useAuth } from '../../context/AuthContext'; 
-import KPICard from '../../components/KPICard';     
-import FilterBar from '../../components/FilterBar'; 
+import { useAuth } from '@/context/AuthContext'; 
+import KPICard from '@/components/KPICard';     
+import FilterBar from '@/components/FilterBar'; 
 
-// Import icons from react-icons
-import { 
-  FaRegChartBar, FaRegCalendarCheck, FaRegThumbsUp, 
-  FaBuilding, FaUsers, FaUserCheck, FaTasks, FaBalanceScale, FaExclamationTriangle,
-  FaPoundSign, FaFileContract, FaCoins 
-} from 'react-icons/fa';
-
-// KPI Definitions (to map names to icons and short titles)
-// Ensure these names EXACTLY match the 'name' field of the KPI objects returned by your API
-const KPI_NAMES = {
-    CO_KPI_ON_TIME: "CO KPI On Time",
-    AWARD_NOTICE_ON_TIME: "Award Notice On Time",
-    UK01_NOTICE_ON_TIME: "UK01 Notice On Time",
-    CONTRACT_OVERSPEND_PERCENT: "Contract Overspend %",
-    CONTRACT_CLOSURE_ON_TIME: "Contract Closure On Time",
-    SOCIAL_VALUE_MET: "Social Value Met",
-    SME_AWARDED: "SME Awarded",
-    COMPETITIVELY_TENDERED: "Competitively Tendered",
-    MANDATORY_TRAINING_COMPLETION: "Mandatory Training Completion",
-    CABINET_OFFICE_CONDITIONS_MET: "Cabinet Office Conditions Met",
-};
-
-// Map KPI names to icons
-const kpiIcons = {
-  [KPI_NAMES.CO_KPI_ON_TIME]: FaRegCalendarCheck,
-  [KPI_NAMES.AWARD_NOTICE_ON_TIME]: FaTasks,
-  [KPI_NAMES.UK01_NOTICE_ON_TIME]: FaTasks,
-  [KPI_NAMES.CONTRACT_OVERSPEND_PERCENT]: FaPoundSign,
-  [KPI_NAMES.CONTRACT_CLOSURE_ON_TIME]: FaRegThumbsUp,
-  [KPI_NAMES.SOCIAL_VALUE_MET]: FaBalanceScale,
-  [KPI_NAMES.SME_AWARDED]: FaBuilding,
-  [KPI_NAMES.COMPETITIVELY_TENDERED]: FaUsers,
-  [KPI_NAMES.MANDATORY_TRAINING_COMPLETION]: FaUserCheck,
-  [KPI_NAMES.CABINET_OFFICE_CONDITIONS_MET]: FaRegChartBar,
-  default: FaExclamationTriangle 
-};
-
-// Define short titles for KPIs
-const KPI_SHORT_TITLES = {
-  [KPI_NAMES.CO_KPI_ON_TIME]: "CO KPI",
-  [KPI_NAMES.AWARD_NOTICE_ON_TIME]: "Award Notices",
-  [KPI_NAMES.UK01_NOTICE_ON_TIME]: "UK01 Notices",
-  [KPI_NAMES.CONTRACT_OVERSPEND_PERCENT]: "Overspend %",
-  [KPI_NAMES.CONTRACT_CLOSURE_ON_TIME]: "Closures",
-  [KPI_NAMES.SOCIAL_VALUE_MET]: "Social Value",
-  [KPI_NAMES.SME_AWARDED]: "SME Contracts",
-  [KPI_NAMES.COMPETITIVELY_TENDERED]: "Competitive Tenders",
-  [KPI_NAMES.MANDATORY_TRAINING_COMPLETION]: "Training Comp.",
-  [KPI_NAMES.CABINET_OFFICE_CONDITIONS_MET]: "CO Conditions",
-};
+// Import shared constants
+import { KPI_NAMES, kpiIcons, KPI_SHORT_TITLES } from '@/lib/kpiConstants.js';
+// Import icons needed for this page if not covered by kpiIcons from constants
+import { FaExclamationTriangle, FaRegChartBar as DefaultKpiIcon } from 'react-icons/fa';
 
 
 export default function DashboardPage() {
@@ -317,13 +270,7 @@ export default function DashboardPage() {
       )}
 
 
-      {/* Placeholder for Trend Line Chart */}
-      <div className="mt-10 md:mt-12 bg-background-secondary p-4 md:p-6 rounded-card shadow-lg">
-        <h2 className="text-xl md:text-2xl font-semibold text-accent-primary mb-4">KPI Trends Over Time</h2>
-        <div className="h-56 md:h-64 flex items-center justify-center text-textClr-secondary bg-background-tertiary rounded">
-          [Trend Line Chart will go here]
-        </div>
-      </div>
+      
     </div>
   );
 }

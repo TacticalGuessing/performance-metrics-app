@@ -3,27 +3,11 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 // Ensure path alias or relative path is correct
 import { getTokenFromRequest, verifyToken } from '@/lib/authUtils.js';
+import { KPI_NAMES } from '@/lib/kpiConstants.js';
 
 const prisma = new PrismaClient();
 
-// KPI Definitions
-const KPI_NAMES = {
-    CO_KPI_ON_TIME: "CO KPI On Time",
-    AWARD_NOTICE_ON_TIME: "Award Notice On Time",
-    UK01_NOTICE_ON_TIME: "UK01 Notice On Time",
-    CONTRACT_OVERSPEND_PERCENT: "Contract Overspend %",
-    CONTRACT_CLOSURE_ON_TIME: "Contract Closure On Time",
-    SOCIAL_VALUE_MET: "Social Value Met",
-    SME_AWARDED: "SME Awarded",
-    COMPETITIVELY_TENDERED: "Competitively Tendered",
-    MANDATORY_TRAINING_COMPLETION: "Mandatory Training Completion",
-    CABINET_OFFICE_CONDITIONS_MET: "Cabinet Office Conditions Met",
-    // Helper metric names for live contract stats (ensure ingest script creates these)
-    CONTRACT_STATUS_TEXT: "Contract Status Text", 
-    CONTRACT_BUDGET_VALUE: "Contract Budget Value",
-    CONTRACT_CLOSURE_ON_TIME: "Contract Closure On Time", // This might be one of your 10 if it's about timeliness
-    EXPIRED_CONTRACT_IS_CLOSED: "Expired Contract Is Closed", // This will feed the "Closures" card 
-};
+
 
 // Helper function to determine target personnel IDs and data scope name based on filters
 async function getScopeDetailsFromFilters(filterParams = {}) {

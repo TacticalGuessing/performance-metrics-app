@@ -63,7 +63,7 @@ export default function KPICard({
   const titleToDisplay = shortTitle || title; // Use shortTitle if provided, else full title
 
   return (
-    <div className={`p-3 sm:p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out hover:shadow-lg ${colors.bg} flex flex-col justify-between min-h-[160px] sm:min-h-[180px]`}>
+    <div className={`p-3 sm:p-4 rounded shadow-md transition-all duration-300 ease-in-out hover:shadow-lg ${colors.bg} flex flex-col justify-between min-h-[160px] sm:min-h-[180px]`}>
       <div>
         <div className="flex items-start justify-between mb-1">
           {/* Display shortTitle (or title if shortTitle is not provided), but tooltip always shows full title */}
