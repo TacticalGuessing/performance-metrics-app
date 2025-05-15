@@ -23,7 +23,8 @@ const AUTHENTICATED_USER_PATHS = [
     '/kpis', // For future KPI detail pages
     '/api/kpis', // For KPI data fetching APIs
     '/api/auth/me', // Getting current user details
-    '/api/auth/logout', // Logout API
+    '/api/auth/logout',
+    '/api/filters', // Logout API
     // Add other paths that any logged-in user can access
 ];
 

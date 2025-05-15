@@ -8,6 +8,25 @@ const prisma = new PrismaClient();
 
 const CSV_FOLDER_PATH = path.join(process.cwd(), 'reports', 'generated'); // Adjust if your CSVs are elsewhere
 
+// ****** DEFINE IT HERE ******
+const KPI_NAMES_FOR_INGEST = { 
+    CO_KPI_ON_TIME: "CO KPI On Time",
+    AWARD_NOTICE_ON_TIME: "Award Notice On Time",
+    UK01_NOTICE_ON_TIME: "UK01 Notice On Time",
+    CONTRACT_OVERSPEND_PERCENT: "Contract Overspend %",
+    CONTRACT_CLOSURE_ON_TIME: "Contract Closure On Time",
+    SOCIAL_VALUE_MET: "Social Value Met",
+    SME_AWARDED: "SME Awarded",
+    COMPETITIVELY_TENDERED: "Competitively Tendered",
+    CABINET_OFFICE_CONDITIONS_MET: "Cabinet Office Conditions Met",
+    // Added for live stats
+    CONTRACT_STATUS_TEXT: "Contract Status Text",
+    CONTRACT_BUDGET_VALUE: "Contract Budget Value",
+    CONTRACT_CLOSURE_ON_TIME: "Contract Closure On Time", // This is about timeliness IF closed
+    EXPIRED_CONTRACT_IS_CLOSED: "Expired Contract Is Closed", // NEW: Status of expired contracts
+};
+// ***************************
+
 // Helper function to read and parse a CSV file
 async function parseCSV(fileName) {
   const filePath = path.join(CSV_FOLDER_PATH, fileName);
@@ -192,12 +211,14 @@ const KPI_DEFINITIONS = {
     COMPETITIVELY_TENDERED: "Competitively Tendered", // Boolean
     CABINET_OFFICE_CONDITIONS_MET: "Cabinet Office Conditions Met", // Boolean (all conditions A, B, C met)
     // KPI #9 "Mandatory Training" is derived from trainingData, not directly from contract CSV
+    CONTRACT_STATUS_TEXT: "Contract Status Text",
+    CONTRACT_BUDGET_VALUE: "Contract Budget Value"
 };
 
 function calculateContractKPIs(contractRow) {
     const kpiValues = [];
     const {
-        contract_id, snapshot_month, personnel_id, supplier_id,
+        contract_id, snapshot_month, personnel_id, supplier_id, contract_status,
         co_kpi_target_completion_date, co_kpi_actual_completion_date,
         award_notice_required_by_date, award_notice_published_date,
         uk01_notice_required_by_date, uk01_notice_published_date,
@@ -209,6 +230,23 @@ function calculateContractKPIs(contractRow) {
 
     const targetDate = (dateStr) => dateStr ? new Date(dateStr) : null;
     const actualDate = (dateStr) => dateStr ? new Date(dateStr) : null;
+
+    // --- Store Raw Status and Budget as specific metrics ---
+    if (contract_status !== undefined && contract_status !== null) {
+        kpiValues.push({ 
+            metricName: KPI_NAMES_FOR_INGEST.CONTRACT_STATUS_TEXT, 
+            value: String(contract_status), // Ensure value is string for text status
+            valueType: 'text' 
+        });
+    }
+    if (typeof contract_budget_value === 'number' && !isNaN(contract_budget_value)) {
+        kpiValues.push({ 
+            metricName: KPI_NAMES_FOR_INGEST.CONTRACT_BUDGET_VALUE, 
+            value: contract_budget_value, 
+            valueType: 'currency' 
+        });
+    }
+    // --- End of new metrics for live stats ---
 
     // 1. CO KPI On Time
     const coTarget = targetDate(co_kpi_target_completion_date);
@@ -263,16 +301,59 @@ function calculateContractKPIs(contractRow) {
     const allCoConditionsMet = cabinet_office_condition_A_met && cabinet_office_condition_B_met && cabinet_office_condition_C_met;
     kpiValues.push({ metricName: KPI_DEFINITIONS.CABINET_OFFICE_CONDITIONS_MET, value: allCoConditionsMet ? 1 : 0, valueType: 'boolean_flag' });
 
+    // KPI: Expired Contract Is Closed (for the "Closures" card)
+    const expiryDate = targetDate(contract_expiry_date); // targetDate helper converts string to Date
+    const actualClosureDate = actualDate(contract_actual_closure_date);
+    const todayForComparison = new Date(); // Use a consistent 'today' for the snapshot processing
+                                        // Or better, use the snapshotDate if available and relevant
+                                        // For simplicity, let's assume we check against actual 'today' for expiry
+
+    let expiredContractIsClosedValue = null;
+    if (expiryDate && expiryDate < todayForComparison) { // Contract IS expired
+        if (actualClosureDate || (contract_status && contract_status.toLowerCase() === 'closed')) {
+            expiredContractIsClosedValue = 1; // Expired AND Closed
+        } else {
+            expiredContractIsClosedValue = 0; // Expired but NOT Closed
+        }
+    } // If not expired, value remains null (N/A for this metric)
+
+    // Only add this metric if the contract was expired, otherwise it's not relevant to this KPI
+    if (expiredContractIsClosedValue !== null) {
+        kpiValues.push({
+            metricName: "Expired Contract Is Closed", // Add this to KPI_NAMES_FOR_INGEST
+            value: expiredContractIsClosedValue,    // Will be 0 or 1
+            valueType: 'boolean_flag'
+        });
+    } 
+
     return kpiValues.map(kpi => ({
         contractId: contract_id,
         snapshotMonth: snapshot_month,
         personnelId: personnel_id,
-        supplierId: supplier_id, // Add supplier_id here
+        supplierId: supplier_id,
         metricName: kpi.metricName,
-        value: kpi.value,
+        value: (kpi.value !== null && kpi.value !== undefined) ? String(kpi.value) : null, // This will be string for status, number for budget/percentage
         valueType: kpi.valueType,
-        // dateAssociated could be the snapshot_month's first day, or specific event dates
-        dateAssociated: new Date(snapshot_month + '-01') 
+        dateAssociated: new Date(snapshot_month + '-01'),
+        // Populate other direct fields from contractRow if your Prisma schema for Contract still has them
+        // and you want them on *every* metric row (which is denormalized but matches your screenshot)
+        coKpiTargetCompletionDate: co_kpi_target_completion_date ? new Date(co_kpi_target_completion_date) : null,
+        coKpiActualCompletionDate: co_kpi_actual_completion_date ? new Date(co_kpi_actual_completion_date) : null,
+        awardNoticeRequiredByDate: award_notice_required_by_date ? new Date(award_notice_required_by_date) : null,
+        awardNoticePublishedDate: award_notice_published_date ? new Date(award_notice_published_date) : null,
+        uk01NoticeRequiredByDate: uk01_notice_required_by_date ? new Date(uk01_notice_required_by_date) : null,
+        uk01NoticePublishedDate: uk01_notice_published_date ? new Date(uk01_notice_published_date) : null,
+        contractBudgetValue: typeof contract_budget_value === 'number' ? contract_budget_value : null,
+        contractActualSpend: typeof contract_actual_spend === 'number' ? contract_actual_spend : null,
+        contractExpiryDate: contract_expiry_date ? new Date(contract_expiry_date) : null,
+        contractClosureTargetDate: contract_closure_target_date ? new Date(contract_closure_target_date) : null,
+        contractActualClosureDate: contract_actual_closure_date ? new Date(contract_actual_closure_date) : null,
+        hasSocialValueCommitment: typeof has_social_value_commitment === 'boolean' ? has_social_value_commitment : null,
+        isSmeAwarded: typeof is_sme_awarded === 'boolean' ? is_sme_awarded : null,
+        wasCompetitivelyTendered: typeof was_competitively_tendered === 'boolean' ? was_competitively_tendered : null,
+        cabinetOfficeConditionAMet: typeof cabinet_office_condition_A_met === 'boolean' ? cabinet_office_condition_A_met : null,
+        cabinetOfficeConditionBMet: typeof cabinet_office_condition_B_met === 'boolean' ? cabinet_office_condition_B_met : null,
+        cabinetOfficeConditionCMet: typeof cabinet_office_condition_C_met === 'boolean' ? cabinet_office_condition_C_met : null,
     }));
 }
 

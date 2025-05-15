@@ -59,7 +59,7 @@ model Contract {
   contractId                  String   @map("contract_id")
   snapshotMonth               String   @map("snapshot_month") // YYYY-MM
   metricName                  String   @map("metric_name")
-  value                       Float?
+  value                       String?
   targetValue                 Float?   @map("target_value")
   valueType                   String?  @map("value_type") // e.g., 'percentage', 'currency'
   dateAssociated              DateTime? @map("date_associated") @db.Date // Use @db.Date for DATE SQL type
