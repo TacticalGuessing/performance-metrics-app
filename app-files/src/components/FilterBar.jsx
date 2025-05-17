@@ -2,9 +2,10 @@
 'use client';
 
 import React from 'react';
-import { FaTimes } from 'react-icons/fa'; // Import X icon for clear button
+import { FaTimes } from 'react-icons/fa'; 
 
 export default function FilterBar({
+  // Existing props
   teams,
   subTeams,
   personnel,
@@ -19,7 +20,15 @@ export default function FilterBar({
   isLoadingTeams,
   isLoadingSubTeams,
   isLoadingPersonnel,
+  // New props for Snapshot filter
+  snapshotMonths,
+  selectedSnapshot,
+  setSelectedSnapshot,
+  isLoadingSnapshots,
 }) {
+  // This log is good, keep it or refine it
+  console.log("FILTERBAR PROPS RECEIVED:", { snapshotMonths, isLoadingSnapshots, selectedSnapshot }); 
+
   const handleTeamChange = (e) => {
     const value = e.target.value;
     setSelectedTeam(value);
@@ -37,27 +46,17 @@ export default function FilterBar({
     setSelectedPersonnel(e.target.value);
   };
 
-  // Common class for select elements to ensure consistency and prevent text truncation
-  // 'truncate' class will add ellipsis if text overflows. Remove if you prefer wrapping.
-  // 'min-w-0' helps with flex/grid item sizing to allow truncation.
+  const handleSnapshotChange = (e) => {
+    setSelectedSnapshot(e.target.value);
+  };
+
   const selectClasses = "input-field w-full text-sm appearance-none min-w-0"; 
-  // The 'appearance-none' removes default browser styling for select, 
-  // allowing custom arrow via background image in globals.css or by adding an icon if needed.
 
   return (
     <div className="bg-background-secondary p-3 sm:p-4 rounded shadow-md mb-6 md:mb-8">
-      {/* 
-        Adjust grid columns for different screen sizes.
-        We want 3 dropdowns and 2 buttons.
-        On smallest screens, maybe 1 or 2 items per row.
-        On medium screens, maybe 3 dropdowns then buttons below.
-        On larger screens, all 5 items in one row.
-        Let's try for a layout that flexes and wraps.
-      */}
       <div className="flex flex-wrap items-end gap-3 sm:gap-4">
         {/* Team Dropdown */}
         <div className="flex-grow min-w-[150px] sm:min-w-[180px]"> 
-          {/* Label removed, placeholder text in <option> */}
           <select
             id="team-filter"
             title="Select Team"
@@ -103,7 +102,7 @@ export default function FilterBar({
             id="personnel-filter"
             title="Select Personnel"
             value={selectedPersonnel}
-            onChange={handlePersonnelChange} // Use the new handler
+            onChange={handlePersonnelChange}
             disabled={!selectedSubTeam || isLoadingPersonnel}
             className={selectClasses}
           >
@@ -118,13 +117,51 @@ export default function FilterBar({
             ))}
           </select>
         </div>
+
+        {/* Snapshot Dropdown */}
+        <div className="flex-grow min-w-[150px] sm:min-w-[180px]">
+          <select
+            id="snapshot-filter"
+            title="Select Snapshot Month"
+            value={selectedSnapshot}
+            onChange={handleSnapshotChange} 
+            disabled={isLoadingSnapshots}
+            className={selectClasses}
+          >
+            <option value="">{isLoadingSnapshots ? "Loading..." : "Latest Snapshot"}</option>
+            
+            {/* --- DETAILED LOGGING FOR SNAPSHOT OPTIONS --- */}
+            {console.log("FILTERBAR_SNAPSHOT_RENDER_LOGIC: --- Evaluating snapshot options ---")}
+            {console.log("FILTERBAR_SNAPSHOT_RENDER_LOGIC: isLoadingSnapshots:", isLoadingSnapshots)}
+            {console.log("FILTERBAR_SNAPSHOT_RENDER_LOGIC: snapshotMonths:", snapshotMonths)}
+            {console.log("FILTERBAR_SNAPSHOT_RENDER_LOGIC: snapshotMonths exists and has length?", Boolean(snapshotMonths && snapshotMonths.length > 0))}
+            
+            {(!isLoadingSnapshots && snapshotMonths && snapshotMonths.length > 0) ? (
+              snapshotMonths.map((snap, index) => {
+                // This log is CRITICAL. If it doesn't appear 12 times when data is loaded, the map isn't running as expected.
+                console.log(`FILTERBAR_SNAPSHOT_RENDER_LOGIC: Mapping item ${index + 1}/${snapshotMonths.length}:`, snap); 
+                return (
+                  <option key={snap.value || `snap-opt-${index}`} value={snap.value}>
+                    {snap.label}
+                  </option>
+                );
+              })
+            ) : (
+              // This block runs if the above condition is false.
+              (!isLoadingSnapshots && snapshotMonths) && 
+                console.log("FILTERBAR_SNAPSHOT_RENDER_LOGIC: Condition to map was FALSE or snapshotMonths is empty. isLoadingSnapshots:", isLoadingSnapshots, "snapshotMonths length:", snapshotMonths?.length)
+            )}
+            {console.log("FILTERBAR_SNAPSHOT_RENDER_LOGIC: --- Finished evaluating snapshot options ---")}
+            {/* --- END OF DETAILED LOGGING --- */}
+          </select>
+        </div>
         
-        {/* Action Buttons - using flex to keep them together */}
-        <div className="flex space-x-2 flex-shrink-0"> {/* flex-shrink-0 prevents buttons from shrinking too much */}
+        {/* Action Buttons */}
+        <div className="flex space-x-2 flex-shrink-0">
             <button
                 onClick={onApplyFilters}
                 title="Apply selected filters"
-                className="btn-primary text-sm py-2 px-4 whitespace-nowrap" // Added whitespace-nowrap
+                className="btn-primary text-sm py-2 px-4 whitespace-nowrap"
             >
                 Apply Filters
             </button>
@@ -133,7 +170,7 @@ export default function FilterBar({
                 title="Clear all filters"
                 className="bg-gray-600 hover:bg-gray-500 text-textClr-primary p-2 rounded-minimal focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
             >
-                <FaTimes className="w-4 h-4 sm:w-5 sm:h-5" /> {/* X Icon */}
+                <FaTimes className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
         </div>
       </div>
